@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { LAYOUT_HINT, LAYOUT_LABEL } from "@/lib/constants";
+import { hasBackDevice } from "@/lib/types";
 import { COPY_IDEA_SLOTS } from "@/lib/copy-ideas";
 import { nid } from "@/lib/defaults";
 import { img } from "@/lib/image-cache";
@@ -156,7 +157,7 @@ export function Inspector({
                 layout: next,
                 transforms: undefined,
                 screenshotSecondary:
-                  next === "two-devices" ? slide.screenshotSecondary || slide.screenshot : slide.screenshotSecondary,
+                  hasBackDevice(next) ? slide.screenshotSecondary || slide.screenshot : slide.screenshotSecondary,
               });
             }}
           >
@@ -209,7 +210,7 @@ export function Inspector({
         {!isFeatureGraphic && !isNoDevice && (
           <div className="space-y-1.5">
             <Label className="text-xs">
-              {slide.layout === "two-devices" ? "Front device screenshot" : "Screenshot"}
+              {hasBackDevice(slide.layout) ? "Front device screenshot" : "Screenshot"}
             </Label>
             <ScreenshotPicker
               label="Primary"
@@ -220,7 +221,7 @@ export function Inspector({
           </div>
         )}
 
-        {slide.layout === "two-devices" && (
+        {hasBackDevice(slide.layout) && (
           <div className="space-y-1.5">
             <Label className="text-xs">Back device screenshot</Label>
             <ScreenshotPicker
@@ -332,7 +333,7 @@ function ElementTransformControls({
 }) {
   const present: ElementId[] = ["caption"];
   if (slide.layout !== "no-device") present.push("device");
-  if (slide.layout === "two-devices") present.push("deviceSecondary");
+  if (hasBackDevice(slide.layout)) present.push("deviceSecondary");
   if (slide.callout && calloutAvailable(slide, device)) present.push("callout");
   for (const element of slide.textElements || []) present.push(toTextElementId(element.id));
   for (const element of slide.imageElements || []) present.push(toImageElementId(element.id));

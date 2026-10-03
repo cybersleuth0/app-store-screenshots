@@ -5,6 +5,7 @@
 import { SCREENSHOT_FONTS, THEMES, supportsLandscape } from "./constants";
 import { DEFAULT_SCENE, sameScene, sceneOf } from "./scene";
 import type { Device, Look, ProjectState, Scene, ScreenshotFontId, Slide, SlideLayout } from "./types";
+import { hasBackDevice } from "./types";
 
 export type LockKey = "palette" | "type" | "layout" | "scene";
 export type Locks = Record<LockKey, boolean>;
@@ -299,7 +300,7 @@ function restyleSlide(slide: Slide, index: number, look: Look, locks: Locks, rea
   if (!locks.layout && rearrange && slide.layout !== "no-device" && slide.layout !== "feature-graphic") {
     let layout = look.layouts[index % look.layouts.length];
     // A back device without its own screenshot would just repeat the front one.
-    if (layout === "two-devices" && !slide.screenshotSecondary) layout = "hero";
+    if (hasBackDevice(layout) && !slide.screenshotSecondary) layout = "hero";
     if (layout === "no-device" || layout === "feature-graphic" || layout === "split-landscape") layout = slide.layout;
     // Fresh layout = fresh default placement, so the look reads as designed.
     const { caption: _c, device: _d, deviceSecondary: _s, callout: _m, ...kept } = slide.transforms || {};

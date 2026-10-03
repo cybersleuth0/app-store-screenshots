@@ -371,7 +371,7 @@ function Blob({
 
 // ---------- Default element rects per layout ----------
 
-type Rect = { x: number; y: number; width: number; height: number };
+type Rect = { x: number; y: number; width: number; height: number; rotation?: number };
 type LayoutRects = {
   caption?: Rect & { align?: "center" | "left" };
   device?: Rect;
@@ -443,6 +443,62 @@ function getDefaultRects(
           y: contain ? cH - (deviceW * 0.9) / frameAspect - cH * 0.05 : cH - deviceH * 0.9 - cH * 0.02,
           width: deviceW * 0.9,
           height: (deviceW * 0.9) / frameAspect,
+        },
+      };
+    // goldie-style layouts: the default rect carries a rotation; a saved transform overrides it.
+    case "tilt":
+    case "tilt-right": {
+      const right = layout === "tilt-right";
+      return {
+        caption: { x: cW * 0.08, y: cH * 0.07, width: capW, height: capH, align: "center" },
+        device: {
+          x: (cW - deviceW) / 2 + (right ? cW * 0.03 : -cW * 0.03),
+          y: contain ? cH - deviceH - cH * 0.05 : cH - deviceH + deviceH * 0.08,
+          width: deviceW,
+          height: deviceH,
+          rotation: right ? 8 : -8,
+        },
+      };
+    }
+    case "offset":
+      return {
+        caption: { x: cW * 0.07, y: cH * 0.08, width: cW * 0.62, height: capH, align: "left" },
+        device: {
+          x: contain ? cW - deviceW - cW * 0.04 : cW - deviceW - cW * 0.02,
+          y: contain ? cH - deviceH - cH * 0.05 : cH - deviceH * 0.82,
+          width: deviceW,
+          height: deviceH,
+        },
+      };
+    case "duo-tilt":
+      return {
+        caption: { x: cW * 0.08, y: cH * 0.07, width: capW, height: capH, align: "center" },
+        deviceSecondary: {
+          x: cW * 0.06,
+          y: cH - smallH - cH * 0.04,
+          width: smallW,
+          height: smallH,
+          rotation: -8,
+        },
+        device: {
+          x: cW - deviceW * 0.8 - cW * 0.06,
+          y: contain ? cH - (deviceW * 0.8) / frameAspect - cH * 0.05 : cH - deviceH * 0.8 + cH * 0.03,
+          width: deviceW * 0.8,
+          height: (deviceW * 0.8) / frameAspect,
+          rotation: 7,
+        },
+      };
+    case "panorama":
+      // ponytail: centred on the right edge, so half shows here and half on the next screen.
+      // Needs connected canvas; in isolated export the right half is simply cropped.
+      return {
+        caption: { x: cW * 0.07, y: cH * 0.08, width: cW * 0.6, height: capH, align: "left" },
+        device: {
+          x: contain ? cW - deviceW - cW * 0.04 : cW - deviceW * 0.62,
+          y: (cH - deviceH) / 2 + cH * 0.16,
+          width: deviceW,
+          height: deviceH,
+          rotation: contain ? 0 : -6,
         },
       };
     case "no-device":
@@ -560,7 +616,7 @@ export function getElementTransform(
     y: rect.y,
     width: rect.width,
     height: rect.height,
-    rotation: saved?.rotation ?? 0,
+    rotation: saved?.rotation ?? rect.rotation ?? 0,
     zIndex: saved?.zIndex ?? defaultElementZ(id as BuiltInElementId),
   };
 }
@@ -1101,7 +1157,7 @@ function SlideElements({
 
   function renderDevice(id: "device" | "deviceSecondary", rect: Rect, src: string, extraStyle?: React.CSSProperties) {
     const saved = slide.transforms?.[id];
-    const rotation = saved?.rotation ?? 0;
+    const rotation = saved?.rotation ?? rect.rotation ?? 0;
     const zIndex = saved?.zIndex ?? (id === "deviceSecondary" ? 2 : 3);
     return (
       <Movable

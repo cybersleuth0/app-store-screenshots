@@ -140,7 +140,7 @@ const path = require("path");
 const PROJECT_FILE = "app-store-screenshots.json";
 const DEFAULT_LOCALE = "en";
 const DEVICE_KEYS = ["iphone", "ipad", "tvos", "watchos", "carplay", "mac", "android", "android-7", "android-10", "feature-graphic"];
-const LAYOUTS = ["hero", "device-bottom", "device-top", "two-devices", "no-device", "split-landscape", "feature-graphic"];
+const LAYOUTS = ["hero", "device-bottom", "device-top", "two-devices", "tilt", "tilt-right", "offset", "duo-tilt", "panorama", "no-device", "split-landscape", "feature-graphic"];
 
 function readJson(file) {
   try {
@@ -682,6 +682,7 @@ Every Apple TV and Apple Watch size below was read from App Store Connect's own 
 - **Mac is its own toolbar tab** (iOS / Mac / Android), not a device under iOS: App Store Connect lists macOS as a separate platform with its own screenshot set, so the Mac bundle exports to `macos/mac/<WxH>/<locale>/` rather than inside `ios/`. Every Mac size is an exact 16:10 downscale of the canvas; nothing is trimmed.
 - **The Mac window is contained** like the TV and CarPlay frames, and its content area below the title bar is exactly 16:10, so a full-screen 16:10 capture fills it without cropping. Other aspects are cover-cropped from the bottom (the top of the window stays visible).
 - **Screenshots:** a full-screen capture (⌘⇧3) at a 16:10 resolution is the cleanest source. Notched MacBook Pros capture at ~1.54:1, which loses a few percent off the bottom (the Dock). A single-window capture (⌘⇧4, then Space) already has its own title bar, so the frame would draw a second one: crop the window's title bar off first, or use a full-screen capture.
+- **Phone layouts:** besides `hero`, `device-bottom`, `device-top` and `two-devices`, phones and tablets can use `tilt` / `tilt-right` (device rotated ±8°), `offset` (headline left, device right), `duo-tilt` (two fanned phones, uses `screenshotSecondary`) and `panorama` (device straddles the right edge into the next screen; needs connected canvas). A good rhythm: hero → tilt → offset → duo-tilt → device-bottom → tilt-right → panorama → no-device.
 - **Layouts:** the starter deck is `hero` → `split-landscape` → `device-top` (inverted) → `two-devices` → `no-device`. Because the window is contained, `hero` and `device-bottom` look almost the same; prefer `split-landscape` or `two-devices` (two overlapping windows) for variety.
 
 ## Step 6: Final QA Gate

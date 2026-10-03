@@ -29,6 +29,7 @@ import type {
   ProjectState,
   Slide,
 } from "@/lib/types";
+import { hasBackDevice } from "@/lib/types";
 import { Inspector } from "./inspector";
 import { PreviewStage } from "./preview-stage";
 import { Sidebar } from "./sidebar";
@@ -45,6 +46,18 @@ export function ScreenshotEditor() {
   const [, refreshAssets] = React.useReducer((version: number) => version + 1, 0);
   const [exportLocaleOverride, setExportLocaleOverride] = React.useState<string | null>(null);
   const [exportSlideIndex, setExportSlideIndex] = React.useState(0);
+  // Focus mode: hide the screens list and the inspector so only the canvas shows. Toggle with \ or the button.
+  const [panelsHidden, setPanelsHidden] = React.useState(false);
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (e.key !== "\\" || t?.isContentEditable || t?.tagName === "INPUT" || t?.tagName === "TEXTAREA") return;
+      e.preventDefault();
+      setPanelsHidden((h) => !h);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const exportInProgress = React.useRef(false);
   const [exportProject, setExportProject] = React.useState<ProjectState | null>(null);
   const exportRef = React.useRef<HTMLDivElement | null>(null);
@@ -462,7 +475,7 @@ export function ScreenshotEditor() {
       .filter(
         ({ slide }) =>
           state.device !== "feature-graphic" &&
-          slide.layout === "two-devices" &&
+          hasBackDevice(slide.layout) &&
           slide.screenshot &&
           !slide.screenshotSecondary,
       );
@@ -710,7 +723,7 @@ export function ScreenshotEditor() {
       />
 
       <div inert={busy} aria-busy={busy} className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
-        <aside className="lg:w-72 w-full shrink-0 border-r bg-card lg:max-h-none max-h-64 overflow-hidden">
+        <aside className={`lg:w-72 w-full shrink-0 border-r bg-card lg:max-h-none max-h-64 overflow-hidden ${panelsHidden ? "hidden" : ""}`}>
           <Sidebar
             slides={currentSlides}
             activeId={activeSlide?.id || null}
@@ -732,7 +745,15 @@ export function ScreenshotEditor() {
           />
         </aside>
 
-        <main className="flex h-[26rem] shrink-0 items-stretch overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1">
+        <main className="relative flex h-[26rem] shrink-0 items-stretch overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1">
+          <button
+            type="button"
+            onClick={() => setPanelsHidden((h) => !h)}
+            title={panelsHidden ? "Show panels (\\)" : "Hide panels (\\)"}
+            className="absolute right-3 top-3 z-20 rounded-md border bg-card/90 px-2.5 py-1 text-xs font-medium shadow-sm backdrop-blur hover:bg-accent"
+          >
+            {panelsHidden ? "Show panels" : "Hide panels"}
+          </button>
           {activeSlide && currentSlides.length > 0 ? (
             <PreviewStage
               slides={currentSlides}
@@ -762,7 +783,7 @@ export function ScreenshotEditor() {
           )}
         </main>
 
-        <aside className="lg:w-80 w-full shrink-0 border-l bg-card lg:max-h-none max-h-96 overflow-hidden">
+        <aside className={`lg:w-80 w-full shrink-0 border-l bg-card lg:max-h-none max-h-96 overflow-hidden ${panelsHidden ? "hidden" : ""}`}>
           {activeSlide ? (
             <Inspector
               key={`${state.device}:${activeSlide.id}`}

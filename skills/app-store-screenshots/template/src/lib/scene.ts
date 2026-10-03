@@ -41,7 +41,8 @@ export const DEFAULT_CALLOUT: Callout = { focusX: 0.5, focusY: 0.32, zoom: 2, sh
 const BACKDROP_IDS = new Set(BACKDROPS.map((b) => b.id));
 const DECORATION_IDS = new Set(DECORATIONS.map((d) => d.id));
 const LAYOUTS: ReadonlySet<SlideLayout> = new Set([
-  "hero", "device-bottom", "device-top", "two-devices", "no-device", "split-landscape", "feature-graphic",
+  "hero", "device-bottom", "device-top", "two-devices", "tilt", "tilt-right", "offset", "duo-tilt", "panorama",
+  "no-device", "split-landscape", "feature-graphic",
 ]);
 
 const record = (value: unknown): value is Record<string, unknown> =>

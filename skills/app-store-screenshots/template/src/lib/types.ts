@@ -15,11 +15,19 @@ export type Orientation = "portrait" | "landscape";
 export type Platform = "ios" | "macos" | "android";
 
 // Layouts the editor can render. Vary across slides for visual rhythm.
+/** Layouts that show a second, back-layer phone. */
+export const hasBackDevice = (layout: string) => layout === "two-devices" || layout === "duo-tilt";
+
 export type SlideLayout =
   | "hero"             // centered device, headline above
   | "device-bottom"    // headline top, device bottom-center
   | "device-top"       // device top, headline bottom (contrast)
   | "two-devices"      // back + front phones, headline above
+  | "tilt"             // headline top, device tilted left (goldie-style)
+  | "tilt-right"       // headline top, device tilted right
+  | "offset"           // headline top-left, device pushed off the right edge
+  | "duo-tilt"         // two phones fanned out, headline above
+  | "panorama"         // device straddles the right edge into the next screen (connected canvas)
   | "no-device"        // big headline + decorative blob, no device
   | "split-landscape"  // landscape tablets + Mac: caption left + device right
   | "feature-graphic"; // 1024×500 banner with icon + name + tagline

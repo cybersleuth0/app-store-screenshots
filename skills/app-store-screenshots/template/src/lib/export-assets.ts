@@ -1,5 +1,6 @@
 import { resolveScreenshot } from "./locale";
 import type { ProjectState } from "./types";
+import { hasBackDevice } from "./types";
 
 /** Only assets used by the deck being exported; inactive decks may be unfinished. */
 export function exportAssetPaths(state: ProjectState): string[] {
@@ -14,7 +15,7 @@ export function exportAssetPaths(state: ProjectState): string[] {
       if (state.device === "iphone") add("/mockup.png");
       for (const locale of state.locales) {
         add(resolveScreenshot(slide.screenshot, locale));
-        if (slide.layout === "two-devices" || slide.transforms?.deviceSecondary) {
+        if (hasBackDevice(slide.layout) || slide.transforms?.deviceSecondary) {
           add(resolveScreenshot(slide.screenshotSecondary, locale));
         }
       }
